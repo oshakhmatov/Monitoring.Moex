@@ -31,13 +31,12 @@ namespace Monitoring.Moex.Infrastructure
 
             var dbConnOptsBuilder = new DbContextOptionsBuilder();
             dbConnOptsBuilder.UseNpgsql(dbConnOptions.ConnectionString);
-            //dbConnOptsBuilder.UseInMemoryDatabase("moex");
+
             var dbContext = new AppDbContext(dbConnOptsBuilder.Options);
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
 
             return services.AddDbContext<AppDbContext>(o => o.UseNpgsql(dbConnOptions.ConnectionString));
-            //return services.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase("moex"));
         }
 
         public static IServiceCollection AddRedisCache(this IServiceCollection services)
