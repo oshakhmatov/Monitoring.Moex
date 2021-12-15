@@ -2,7 +2,7 @@
 {
     public class SecurityTotal
     {
-        public string SecurityId { get; set; }
+        public string? SecurityId { get; set; }
         public long? TradeClock { get; set; }
         public double? Open { get; set; }
         public double? High { get; set; }

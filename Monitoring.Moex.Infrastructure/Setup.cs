@@ -2,11 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Monitoring.Moex.Core.DataAccess;
-using Monitoring.Moex.Core.Rules.Services.LastTotalsMonitoring;
-using Monitoring.Moex.Core.Rules.Services.SecuritiesMonitoring;
+using Monitoring.Moex.Core.Proccesses.LastTotalsMonitoring;
+using Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring;
 using Monitoring.Moex.Core.SharedOptions;
 using Monitoring.Moex.Infrastructure.Data;
-using Monitoring.Moex.Infrastructure.HostedServices;
 using StackExchange.Redis;
 using System.Reflection;
 
@@ -52,32 +51,30 @@ namespace Monitoring.Moex.Infrastructure
         public static IServiceCollection AddRepos(this IServiceCollection services)
         {
             var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup)).DefinedTypes.Where(x => x.Name.EndsWith("Repo"));
+
             foreach (var type in typesFromAssemblies)
+            {
                 services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name), type, ServiceLifetime.Scoped));
+            }
 
             return services;
         }
 
         public static IServiceCollection AddQueryHandlers(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>)).DefinedTypes.Where(x => x.Name.EndsWith("Qh"));
+            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.IsClass && x.Name.EndsWith("Service"));
+
             foreach (var type in typesFromAssemblies)
-                services.Add(new ServiceDescriptor(type, type, ServiceLifetime.Scoped));
-
-            return services;
-        }
-
-        public static IServiceCollection AddHostedServices(this IServiceCollection services)
-        {
-            services.AddHostedService<LastTotalsMonitoringHostedService>();
-            services.AddHostedService<SecuritiesMonitoringHostedService>();
+            {
+                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
+            }
 
             return services;
         }
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>)).DefinedTypes.Where(x => x.Name.Contains("Service"));
+            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.Name.Contains("Proccess"));
             foreach (var type in typesFromAssemblies)
                 services.Add(new ServiceDescriptor(type, type, ServiceLifetime.Singleton));
 
@@ -86,9 +83,13 @@ namespace Monitoring.Moex.Infrastructure
 
         public static IServiceCollection AddHelpers(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup)).DefinedTypes.Where(x => x.Name.Contains("Helper"));
+            var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup))!.DefinedTypes.Where(x => x.Name.Contains("Helper"));
             foreach (var type in typesFromAssemblies)
-                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name), type, ServiceLifetime.Scoped));
+                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
+
+            typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.Name.Contains("Helper"));
+            foreach (var type in typesFromAssemblies)
+                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
 
             return services;
         }

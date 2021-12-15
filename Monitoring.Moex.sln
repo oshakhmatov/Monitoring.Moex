@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31903.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monitoring.Moex.WebApi", "Monitoring.Moex.WebApi\Monitoring.Moex.WebApi.csproj", "{E4FAD37C-BF6C-4E6D-A312-4B0623C1374F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitoring.Moex.WebApi", "Monitoring.Moex.WebApi\Monitoring.Moex.WebApi.csproj", "{E4FAD37C-BF6C-4E6D-A312-4B0623C1374F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0F7F7713-AC4A-4A09-A71F-CEE807572BFB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitoring.Moex.Core", "Monitoring.Moex.Core\Monitoring.Moex.Core.csproj", "{EDD07306-B45A-4532-B2EF-3FBE3B9E219D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitoring.Moex.Infrastructure", "Monitoring.Moex.Infrastructure\Monitoring.Moex.Infrastructure.csproj", "{A98D142C-8C34-47FA-8259-257AFFC2A061}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{390851F5-A1D2-4727-A18E-D3139553E04D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +33,10 @@ Global
 		{A98D142C-8C34-47FA-8259-257AFFC2A061}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A98D142C-8C34-47FA-8259-257AFFC2A061}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A98D142C-8C34-47FA-8259-257AFFC2A061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -37,6 +45,7 @@ Global
 		{E4FAD37C-BF6C-4E6D-A312-4B0623C1374F} = {0F7F7713-AC4A-4A09-A71F-CEE807572BFB}
 		{EDD07306-B45A-4532-B2EF-3FBE3B9E219D} = {0F7F7713-AC4A-4A09-A71F-CEE807572BFB}
 		{A98D142C-8C34-47FA-8259-257AFFC2A061} = {0F7F7713-AC4A-4A09-A71F-CEE807572BFB}
+		{F353A0ED-01AE-40ED-A1AA-1BF25DF7A133} = {390851F5-A1D2-4727-A18E-D3139553E04D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {52A05B08-B302-4D9D-92A4-B1B14A80198C}

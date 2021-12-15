@@ -1,22 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Monitoring.Moex.Core.Dto.SecurityTotals;
-using Monitoring.Moex.Core.Rules.QueryHandlers.LastTotals;
-using Monitoring.Moex.Core.Rules.QueryHandlers.LastTotals.ViewModels;
+using Monitoring.Moex.Core.Services.SecurityTotals;
 
 namespace Monitoring.Moex.WebApi.Controllers
 {
     public class LastTotalsController : AppController
     {
-        [HttpGet]
-        public async Task<LastTotalsVm?> GetLastTotals([FromServices] GetLastTotalsQh getLastTotalsQh) =>
-            await getLastTotalsQh.HandleAsync();
+        private readonly ISecurityTotalService _securityTotalService;
+
+        public LastTotalsController(ISecurityTotalService securityTotalService)
+        {
+            _securityTotalService = securityTotalService;
+        }
 
         [HttpGet]
-        public async Task<SecurityTotalShortDto?> GetHighestUp([FromServices] GetHighestUpQh getHighestUpQh) =>
-            await getHighestUpQh.HandleAsync();
+        public async Task<LastTotalsViewModel?> GetLastTotals()
+        {
+            return await _securityTotalService.GetLastTotalsAsync();
+        }
 
         [HttpGet]
-        public async Task<SecurityTotalShortDto?> GetHighestDown([FromServices] GetHighestDownQh getHighestDownQh) =>
-            await getHighestDownQh.HandleAsync();
+        public async Task<SecurityTotalShortDto?> GetHighestUp()
+        {
+            return await _securityTotalService.GetHighestUpAsync();
+        }
+
+        [HttpGet]
+        public async Task<SecurityTotalShortDto?> GetHighestDown()
+        {
+            return await _securityTotalService.GetHighestDownAsync();
+        }
     }
 }
