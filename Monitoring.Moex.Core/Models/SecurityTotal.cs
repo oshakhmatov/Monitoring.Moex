@@ -1,4 +1,6 @@
-﻿namespace Monitoring.Moex.Core.Models
+﻿using Monitoring.Moex.Core.Dto.SecurityTotals;
+
+namespace Monitoring.Moex.Core.Models
 {
     public class SecurityTotal
     {
@@ -13,6 +15,23 @@
         public Security Security { get; set; }
 
         public bool IsNotEmpty()
-            => !String.IsNullOrWhiteSpace(SecurityId) && Close is not null && Open is not null && High is not null && Low is not null;
+        {
+            return !String.IsNullOrWhiteSpace(SecurityId) &&
+                Close is not null &&
+                Open is not null &&
+                High is not null &&
+                Low is not null;
+        }
+
+        public SecurityTotalShortDto AsShortDto()
+        {
+            return new SecurityTotalShortDto()
+            {
+                SecurityName = Security.ShortName,
+                Open = Open!.Value,
+                Close = Close!.Value,
+                DeltaPercentage = OpenCloseDelta
+            };
+        }
     }
 }

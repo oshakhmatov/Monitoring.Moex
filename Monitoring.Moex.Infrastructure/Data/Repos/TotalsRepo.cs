@@ -27,6 +27,7 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
         public TotalsRepo(AppDbContext dbContext, IConnectionMultiplexer redis) : base(dbContext)
         {
             _securityTotals = dbContext.Set<SecurityTotal>();
+
             _redis = redis.GetDatabase();
         }
 
@@ -35,8 +36,10 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
             var redisKey = $"{ListTotalsKey}:{clock}";
             var cachedTotals = await _redis.StringGetAsync(redisKey);
 
-            if (!cachedTotals.IsNull)
-                return JsonConvert.DeserializeObject<List<SecurityTotalShortDto>>(cachedTotals)!;
+            if (cachedTotals.HasValue)
+            {
+                return JsonConvert.DeserializeObject<List<SecurityTotalShortDto>>(cachedTotals);
+            }
 
             var totals = await _securityTotals
                 .Where(st => st.TradeClock == clock)
@@ -44,8 +47,7 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
                 .Select(st => st.AsShortDto())
                 .ToListAsync();
 
-            if (totals.Any())
-                await _redis.StringSetAsync(redisKey, JsonConvert.SerializeObject(totals), TimeSpan.FromHours(ListTotalsExpHours));
+            await _redis.StringSetAsync(redisKey, JsonConvert.SerializeObject(totals), TimeSpan.FromHours(ListTotalsExpHours));
 
             return totals;
         }
@@ -54,13 +56,17 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
         {
             var cachedDate = await _redis.StringGetAsync(MaxTradeDateKey);
 
-            if (!cachedDate.IsNull)
+            if (cachedDate.HasValue)
+            {
                 return long.Parse(cachedDate);
+            }
 
             var clock = await _securityTotals.MaxAsync(s => s.TradeClock);
 
             if (clock is not null)
+            {
                 await _redis.StringSetAsync(MaxTradeDateKey, clock.ToString(), TimeSpan.FromHours(MaxTradeDateExpHours));
+            }
 
             return clock;
         }
@@ -70,8 +76,10 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
             var redisKey = $"{HighestUpKey}:{clock}";
             var cachedHighestUp = await _redis.StringGetAsync(redisKey);
 
-            if (!cachedHighestUp.IsNull)
+            if (cachedHighestUp.HasValue)
+            {
                 return JsonConvert.DeserializeObject<SecurityTotalShortDto>(cachedHighestUp);
+            }
 
             var highestUp = await _dbContext.Set<SecurityTotal>()
                 .Where(s => s.TradeClock == clock)
@@ -81,7 +89,9 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
                 .FirstOrDefaultAsync();
 
             if (highestUp is not null)
+            {
                 await _redis.StringSetAsync(redisKey, JsonConvert.SerializeObject(highestUp), TimeSpan.FromHours(HighestUpExpHours));
+            }
 
             return highestUp;
         }
@@ -91,8 +101,10 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
             var redisKey = $"{HighestDownKey}:{clock}";
             var cachedHighestDown = await _redis.StringGetAsync(redisKey);
 
-            if (!cachedHighestDown.IsNull)
+            if (cachedHighestDown.HasValue)
+            {
                 return JsonConvert.DeserializeObject<SecurityTotalShortDto>(cachedHighestDown);
+            }
 
             var highestDown = await _dbContext.Set<SecurityTotal>()
                 .Where(t => t.TradeClock == clock)
@@ -102,7 +114,9 @@ namespace Monitoring.Moex.Infrastructure.Data.Repos
                 .FirstOrDefaultAsync();
 
             if (highestDown is not null)
+            {
                 await _redis.StringSetAsync(redisKey, JsonConvert.SerializeObject(highestDown), TimeSpan.FromHours(HighestDownExpHours));
+            }
 
             return highestDown;
         }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Monitoring.Moex.Core.DataAccess;
-using Monitoring.Moex.Core.Utils;
 using System.Linq.Expressions;
 
 namespace Monitoring.Moex.Infrastructure.Data
@@ -12,38 +11,45 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public EfRepo(AppDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
             _set = dbContext.Set<TModel>();
         }
 
         public virtual async Task<TModel?> GetAsync(Func<TModel, bool>? predicate = null)
         {
-            if (predicate == null)
+            IQueryable<TModel> models = _set;
+
+            if (predicate != null)
             {
-                return await _set.FirstOrDefaultAsync();
+                var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
+
+                models = _set.Where(expression);
             }
 
-            var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
-
-            return await _set.FirstOrDefaultAsync(expression);
+            return await models.FirstOrDefaultAsync();
         }
 
         public virtual async Task<List<TModel>> ListAsync(Func<TModel, bool>? predicate = null)
         {
-            if (predicate == null)
+            IQueryable<TModel> models = _set;
+
+            if (predicate != null)
             {
-                return await _set.ToListAsync();
+                var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
+
+                models = _set.Where(expression);
             }
 
-            var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
-
-            return await _set.Where(expression).ToListAsync();
+            return await models.ToListAsync();
         }
 
         public virtual async Task AddAsync(TModel model)
         {
-            Guard.NotNull(model, nameof(model));
+            if (model is null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
 
             _set.Add(model);
 
@@ -52,7 +58,10 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public virtual async Task AddRangeAsync(IEnumerable<TModel> models)
         {
-            Guard.NotNull(models, nameof(models));
+            if (models is null)
+            {
+                throw new ArgumentNullException(nameof(models));
+            }
 
             _set.AddRange(models);
 
@@ -61,7 +70,10 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public virtual async Task UpdateAsync(TModel model)
         {
-            Guard.NotNull(model, nameof(model));
+            if (model is null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
 
             _set.Update(model);
 
@@ -70,7 +82,10 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public virtual async Task UpdateRangeAsync(IEnumerable<TModel> models)
         {
-            Guard.NotNull(models, nameof(models));
+            if (models is null)
+            {
+                throw new ArgumentNullException(nameof(models));
+            }
 
             _set.UpdateRange(models);
 
@@ -79,7 +94,10 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public virtual async Task DeleteAsync(TModel model)
         {
-            Guard.NotNull(model, nameof(model));
+            if (model is null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
 
             _set.Remove(model);
 
@@ -88,7 +106,10 @@ namespace Monitoring.Moex.Infrastructure.Data
 
         public virtual async Task DeleteRangeAsync(IEnumerable<TModel> models)
         {
-            Guard.NotNull(models, nameof(models));
+            if (models is null)
+            {
+                throw new ArgumentNullException(nameof(models));
+            }
 
             _set.RemoveRange(models);
 

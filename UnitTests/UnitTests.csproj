@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Monitoring.Moex.Infrastructure\Monitoring.Moex.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Core\Proccesses\LastTotalsMonitoring\" />
+  </ItemGroup>
+
 </Project>

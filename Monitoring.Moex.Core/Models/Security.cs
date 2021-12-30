@@ -1,4 +1,6 @@
-﻿namespace Monitoring.Moex.Core.Models
+﻿using Monitoring.Moex.Core.Dto.SecurityTotals;
+
+namespace Monitoring.Moex.Core.Models
 {
     public class Security
     {
@@ -11,6 +13,8 @@
         public List<SecurityTotal>? Totals { get; set; }
 
         public bool IsNotEmpty()
-            => !String.IsNullOrWhiteSpace(SecurityId) && !String.IsNullOrWhiteSpace(ShortName);
+        {
+            return !String.IsNullOrWhiteSpace(SecurityId) && !String.IsNullOrWhiteSpace(ShortName);
+        }
     }
 }
