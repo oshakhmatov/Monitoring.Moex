@@ -4,11 +4,11 @@ using System.Xml.Linq;
 
 namespace Monitoring.Moex.Core.Proccesses.LastTotalsMonitoring
 {
-    public class ParseTotalsHelper : IParseTotalsHelper
+    public class TotalsXDocumentParser : ITotalsParser
     {
-        public IEnumerable<SecurityTotal> Parse(string input)
+        public IEnumerable<SecurityTotal> Parse(string text)
         {
-            return XDocument.Parse(input).Descendants("row").Select(row => LightSecirityTotalFrom(row));
+            return XDocument.Parse(text).Descendants("row").Select(row => LightSecirityTotalFrom(row));
         }
 
         private static SecurityTotal LightSecirityTotalFrom(XElement element)
@@ -24,7 +24,7 @@ namespace Monitoring.Moex.Core.Proccesses.LastTotalsMonitoring
 
             var dateTime = element.Attribute("TRADEDATE")?.AsDatetime();
 
-            if (dateTime != null)
+            if (dateTime is not null)
             {
                 total.TradeClock = ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
             }

@@ -2,7 +2,7 @@
 
 namespace Monitoring.Moex.Core.Proccesses.LastTotalsMonitoring
 {
-    public interface IParseTotalsHelper
+    public interface ITotalsParser
     {
         IEnumerable<SecurityTotal> Parse(string input);
     }

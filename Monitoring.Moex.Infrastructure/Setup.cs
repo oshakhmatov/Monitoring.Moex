@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Monitoring.Moex.Core.DataAccess;
+using Monitoring.Moex.Core.Proccesses.EmailSender;
 using Monitoring.Moex.Core.Proccesses.LastTotalsMonitoring;
 using Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring;
 using Monitoring.Moex.Core.SharedOptions;
@@ -16,9 +17,9 @@ namespace Monitoring.Moex.Infrastructure
         public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration config)
         {
             services.Configure<DbConnectionOptions>(config.GetSection(nameof(DbConnectionOptions)));
-            services.Configure<MoexAuthOptions>(config.GetSection(nameof(MoexAuthOptions)));
             services.Configure<TotalsMonitoringOptions>(config.GetSection(nameof(TotalsMonitoringOptions)));
             services.Configure<SecuritiesMonitoringOptions>(config.GetSection(nameof(SecuritiesMonitoringOptions)));
+            services.Configure<EmailNotificationOptions>(config.GetSection(nameof(EmailNotificationOptions)));
 
             return services;
         }
@@ -50,19 +51,7 @@ namespace Monitoring.Moex.Infrastructure
 
         public static IServiceCollection AddRepos(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup)).DefinedTypes.Where(x => x.Name.EndsWith("Repo"));
-
-            foreach (var type in typesFromAssemblies)
-            {
-                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name), type, ServiceLifetime.Scoped));
-            }
-
-            return services;
-        }
-
-        public static IServiceCollection AddQueryHandlers(this IServiceCollection services)
-        {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.IsClass && x.Name.EndsWith("Service"));
+            var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup))!.DefinedTypes.Where(x => x.Name.EndsWith("Repo"));
 
             foreach (var type in typesFromAssemblies)
             {
@@ -74,22 +63,24 @@ namespace Monitoring.Moex.Infrastructure
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.Name.Contains("Proccess"));
+            var typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.IsClass && x.Name.EndsWith("Service"));
+
             foreach (var type in typesFromAssemblies)
-                services.Add(new ServiceDescriptor(type, type, ServiceLifetime.Singleton));
+            {
+                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
+            }
 
             return services;
         }
 
-        public static IServiceCollection AddHelpers(this IServiceCollection services)
+        public static IServiceCollection AddOther(this IServiceCollection services)
         {
-            var typesFromAssemblies = Assembly.GetAssembly(typeof(Setup))!.DefinedTypes.Where(x => x.Name.Contains("Helper"));
-            foreach (var type in typesFromAssemblies)
-                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
+            services.AddSingleton<LastTotalsMonitoring>();
+            services.AddSingleton<SecuritiesMonitoring>();
+            services.AddSingleton<EmailSender>();
 
-            typesFromAssemblies = Assembly.GetAssembly(typeof(IRepo<>))!.DefinedTypes.Where(x => x.Name.Contains("Helper"));
-            foreach (var type in typesFromAssemblies)
-                services.Add(new ServiceDescriptor(type.GetInterface("I" + type.Name)!, type, ServiceLifetime.Scoped));
+            services.AddScoped<ISecuritiesParser, SecuritiesXDocumentParser>();
+            services.AddScoped<ITotalsParser, TotalsXDocumentParser>();
 
             return services;
         }

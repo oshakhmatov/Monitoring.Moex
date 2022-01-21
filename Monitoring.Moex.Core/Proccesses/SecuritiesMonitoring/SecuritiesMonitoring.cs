@@ -5,16 +5,18 @@ using System.IO.Compression;
 
 namespace Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring
 {
-    public class SecuritiesMonitoringProccess
+    public class SecuritiesMonitoring
     {
-        private readonly SecuritiesMonitoringOptions _securitiesMonitoringOptions;
+        private const string TEMP_DIR_NAME = "securities";
+
+        private readonly IOptionsMonitor<SecuritiesMonitoringOptions> _securitiesMonitoringOptions;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public SecuritiesMonitoringProccess(
+        public SecuritiesMonitoring(
             IOptionsMonitor<SecuritiesMonitoringOptions> securitiesMonitoringOptions,
             IServiceScopeFactory serviceScopeFactory)
         {
-            _securitiesMonitoringOptions = securitiesMonitoringOptions.CurrentValue;
+            _securitiesMonitoringOptions = securitiesMonitoringOptions;
             _serviceScopeFactory = serviceScopeFactory;
         }
 
@@ -22,42 +24,51 @@ namespace Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                using var client = new HttpClient();
-                var response = await client.GetAsync(_securitiesMonitoringOptions.SecuritiesUrl, stoppingToken);
+                var options = _securitiesMonitoringOptions.CurrentValue;
+
+                await Task.Delay(options.Interval, stoppingToken);
 
                 var tempFileName = Path.GetTempFileName();
-                var tempDirPath = Path.Combine(Path.GetTempPath(), "securities");
+                var tempDirPath = Path.Combine(Path.GetTempPath(), TEMP_DIR_NAME);
+
+                var client = new HttpClient();
+                var fileStream = new FileStream(tempFileName, FileMode.OpenOrCreate);
+                var scope = _serviceScopeFactory.CreateScope();
+
                 try
                 {
-                    using var scope = _serviceScopeFactory.CreateScope();
-                    using var fs = new FileStream(tempFileName, FileMode.OpenOrCreate);
-                    await response.Content.CopyToAsync(fs, stoppingToken);
-                    fs.Close();
+                    client = new HttpClient();
+                    var response = await client.GetAsync(options.SecuritiesUrl, stoppingToken);
+
+                    await response.Content.CopyToAsync(fileStream, stoppingToken);
+                    fileStream.Close();
 
                     ZipFile.ExtractToDirectory(tempFileName, tempDirPath);
                     var dirInfo = new DirectoryInfo(tempDirPath);
                     var extractedFileName = dirInfo.GetFiles().First().FullName;
                     var content = await File.ReadAllTextAsync(extractedFileName, stoppingToken);
 
-                    var parseSecuritiesHelper = scope.ServiceProvider.GetRequiredService<IParseSecuritiesHelper>();
-                    var securities = parseSecuritiesHelper.Parse(content).Where(s => s.IsNotEmpty()).ToArray();
+                    var securitiesParser = scope.ServiceProvider.GetRequiredService<ISecuritiesParser>();
+                    var securities = securitiesParser.Parse(content).Where(s => s.IsNotEmpty());
 
                     var securitiesRepo = scope.ServiceProvider.GetRequiredService<ISecuritiesRepo>();
                     var securityIds = await securitiesRepo.GetAllSecurityIdsAsync();
 
-                    var newSecurities = securities.Where(s => !securityIds.Contains(s.SecurityId));
+                    var newSecurities = securities.Where(s => !securityIds.Contains(s.SecurityId!));
                     await securitiesRepo.AddRangeAsync(newSecurities);
                     
-                    var oldSecurities = securities.Where(s => securityIds.Contains(s.SecurityId));
+                    var oldSecurities = securities.Where(s => securityIds.Contains(s.SecurityId!));
                     await securitiesRepo.UpdateRangeAsync(oldSecurities);
                 }
                 finally
                 {
                     if (File.Exists(tempFileName)) File.Delete(tempFileName);
-                    if (Directory.Exists(tempDirPath)) Directory.Delete(tempDirPath, true);
-                }
+                    if (Directory.Exists(tempDirPath)) Directory.Delete(tempDirPath, recursive: true);
 
-                await Task.Delay(_securitiesMonitoringOptions.Interval, stoppingToken);
+                    client?.Dispose();
+                    fileStream?.Dispose();
+                    scope?.Dispose();
+                }
             }
         }
     }

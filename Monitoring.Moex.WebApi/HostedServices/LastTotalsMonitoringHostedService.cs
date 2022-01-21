@@ -4,9 +4,9 @@ namespace Monitoring.Moex.WebApi.HostedServices
 {
     public class LastTotalsMonitoringHostedService : BackgroundService
     {
-        private readonly LastTotalsMonitoringProccess _lastTotalsMonitoringProccess;
+        private readonly LastTotalsMonitoring _lastTotalsMonitoringProccess;
 
-        public LastTotalsMonitoringHostedService(LastTotalsMonitoringProccess lastTotalsMonitoringProccess)
+        public LastTotalsMonitoringHostedService(LastTotalsMonitoring lastTotalsMonitoringProccess)
         {
             _lastTotalsMonitoringProccess = lastTotalsMonitoringProccess;
         }

@@ -4,9 +4,9 @@ namespace Monitoring.Moex.WebApi.HostedServices
 {
     public class SecuritiesMonitoringHostedService : BackgroundService
     {
-        private readonly SecuritiesMonitoringProccess _securitiesMonitoringProccess;
+        private readonly SecuritiesMonitoring _securitiesMonitoringProccess;
 
-        public SecuritiesMonitoringHostedService(SecuritiesMonitoringProccess securitiesMonitoringProccess)
+        public SecuritiesMonitoringHostedService(SecuritiesMonitoring securitiesMonitoringProccess)
         {
             _securitiesMonitoringProccess = securitiesMonitoringProccess;
         }

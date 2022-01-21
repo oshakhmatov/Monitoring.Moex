@@ -4,13 +4,13 @@ using System.Xml.Linq;
 
 namespace Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring
 {
-    public class ParseSecuritiesHelper : IParseSecuritiesHelper
+    public class SecuritiesXDocumentParser : ISecuritiesParser
     {
-        public IEnumerable<Security> Parse(string input)
+        public IEnumerable<Security> Parse(string text)
         {
-            input = input.Replace("&quot;", @"''");
+            text = text.Replace("&quot;", @"''");
 
-            return XDocument.Parse(input).Descendants("row").Select(row => GetSecurityFrom(row));
+            return XDocument.Parse(text).Descendants("row").Select(row => GetSecurityFrom(row));
         }
 
         private static Security GetSecurityFrom(XElement element)

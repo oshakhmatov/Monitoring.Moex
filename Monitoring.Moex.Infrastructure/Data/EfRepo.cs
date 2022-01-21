@@ -16,29 +16,25 @@ namespace Monitoring.Moex.Infrastructure.Data
             _set = dbContext.Set<TModel>();
         }
 
-        public virtual async Task<TModel?> GetAsync(Func<TModel, bool>? predicate = null)
+        public virtual async Task<TModel?> GetAsync(Expression<Func<TModel, bool>>? predicate = null)
         {
             IQueryable<TModel> models = _set;
 
             if (predicate != null)
             {
-                var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
-
-                models = _set.Where(expression);
+                models = _set.Where(predicate);
             }
 
             return await models.FirstOrDefaultAsync();
         }
 
-        public virtual async Task<List<TModel>> ListAsync(Func<TModel, bool>? predicate = null)
+        public virtual async Task<List<TModel>> ListAsync(Expression<Func<TModel, bool>>? predicate = null)
         {
             IQueryable<TModel> models = _set;
 
             if (predicate != null)
             {
-                var expression = Expression.Lambda<Func<TModel, bool>>(Expression.Call(predicate.Method));
-
-                models = _set.Where(expression);
+                models = _set.Where(predicate);
             }
 
             return await models.ToListAsync();

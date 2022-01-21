@@ -1,9 +1,11 @@
-﻿namespace Monitoring.Moex.Core.DataAccess
+﻿using System.Linq.Expressions;
+
+namespace Monitoring.Moex.Core.DataAccess
 {
     public interface IRepo<TModel> where TModel : class
     {
-        public Task<TModel?> GetAsync(Func<TModel, bool>? predicate);
-        public Task<List<TModel>> ListAsync(Func<TModel, bool>? predicate = null);
+        public Task<TModel?> GetAsync(Expression<Func<TModel, bool>>? predicate);
+        public Task<List<TModel>> ListAsync(Expression<Func<TModel, bool>>? predicate = null);
 
         public Task AddAsync(TModel model);
         public Task AddRangeAsync(IEnumerable<TModel> models);

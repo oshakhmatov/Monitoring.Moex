@@ -2,7 +2,7 @@
 
 namespace Monitoring.Moex.Core.Proccesses.SecuritiesMonitoring
 {
-    public interface IParseSecuritiesHelper
+    public interface ISecuritiesParser
     {
         IEnumerable<Security> Parse(string input);
     }
